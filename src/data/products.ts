@@ -1,0 +1,58 @@
+import type { Product } from '../types/product';
+
+export const mockProducts: Product[] = [
+  {
+    id: 'p-1',
+    name: 'AeroFit 러닝화',
+    description: '가볍고 반응성이 뛰어난 데일리 트레이닝 슈즈',
+    category: '신발',
+    price: 129000,
+    rating: 4.8,
+    image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=80',
+  },
+  {
+    id: 'p-2',
+    name: 'Urban Utility 백팩',
+    description: '출퇴근과 여행에 어울리는 20L 생활방수 백팩',
+    category: '가방',
+    price: 89000,
+    rating: 4.5,
+    image: 'https://images.unsplash.com/photo-1491637639811-60e2756cc1c7?auto=format&fit=crop&w=800&q=80',
+  },
+  {
+    id: 'p-3',
+    name: 'Wave 블루투스 헤드셋',
+    description: '노이즈 캔슬링과 35시간 배터리를 지원하는 헤드셋',
+    category: '전자기기',
+    price: 179000,
+    rating: 4.7,
+    image: 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80',
+  },
+  {
+    id: 'p-4',
+    name: 'PureGlow 무드 조명',
+    description: '앱 연동으로 밝기와 컬러를 제어하는 스마트 램프',
+    category: '홈',
+    price: 54000,
+    rating: 4.3,
+    image: 'https://images.unsplash.com/photo-1519710164239-da123dc03ef4?auto=format&fit=crop&w=800&q=80',
+  },
+  {
+    id: 'p-5',
+    name: 'Active Dry 티셔츠',
+    description: '통기성과 신축성을 갖춘 퍼포먼스 상의',
+    category: '의류',
+    price: 39000,
+    rating: 4.6,
+    image: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=800&q=80',
+  },
+  {
+    id: 'p-6',
+    name: 'Nimbus 텀블러',
+    description: '보온/보냉이 뛰어난 600ml 스테인리스 텀블러',
+    category: '리빙',
+    price: 27000,
+    rating: 4.4,
+    image: 'https://images.unsplash.com/photo-1577937927133-66ef06acdf18?auto=format&fit=crop&w=800&q=80',
+  },
+];
