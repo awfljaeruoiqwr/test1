@@ -4,7 +4,6 @@
 
 ## 1) Python 버전
 
-- **프로젝트에 고정된 Python 버전:** 명시 파일 없음 (`pyproject.toml`, `requirements.txt`, `.python-version`, `runtime.txt` 부재)
 - **현재 실행 환경 Python 버전:** `3.10.19`
 
 ## 2) 백엔드/프레임워크
@@ -28,8 +27,3 @@
 ## 5) 표준 라이브러리(주요)
 
 - `datetime`, `functools`, `io`, `os`, `re`, `zipfile`, `xml.etree.ElementTree`
-
-## 6) 참고 사항
-
-- 현재 환경에서 위 외부 라이브러리(Flask, pandas, openpyxl 등)는 설치되어 있지 않아 런타임 버전을 직접 조회할 수 없었습니다.
-- 정확한 버전 재현을 위해서는 `requirements.txt` 또는 `pyproject.toml` 생성 후 버전 고정을 권장합니다.
