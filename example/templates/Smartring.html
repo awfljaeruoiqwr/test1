@@ -1,0 +1,1705 @@
+{% extends "menu.html" %}
+
+{% block title %}SMARTRING 재고 관리{% endblock %}
+
+{% block additional_styles %}
+.inventory-container {
+    width: 95%;
+    margin: 45px auto;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+}
+.inventory-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #007bff;
+}
+.inventory-title {
+    font-size: 24px;
+    color: #333;
+}
+
+/* 검색 및 필터 영역 */
+.search-filter-section {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.search-bar {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.search-input {
+    flex: 1;
+    padding: 10px 15px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: border-color 0.3s;
+}
+
+.search-input:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+.search-button {
+    padding: 10px 20px;
+    background: #007bff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.search-button:hover {
+    background: #0056b3;
+}
+
+.clear-button {
+    padding: 10px 20px;
+    background: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.clear-button:hover {
+    background: #5a6268;
+}
+
+.filter-section {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+}
+
+.filter-label {
+    font-weight: bold;
+    color: #555;
+    margin-right: 5px;
+}
+
+.filter-btn {
+    padding: 8px 16px;
+    border: 2px solid #ddd;
+    background: white;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 13px;
+    color: #555;
+}
+
+.filter-btn:hover {
+    border-color: #007bff;
+    color: #007bff;
+}
+
+.filter-btn.active {
+    background: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+.filter-btn.status-normal.active {
+    background: #28a745;
+    border-color: #28a745;
+}
+
+.filter-btn.status-repair.active {
+    background: #ffc107;
+    border-color: #ffc107;
+    color: #000;
+}
+
+.filter-btn.status-defect.active {
+    background: #dc3545;
+    border-color: #dc3545;
+}
+
+.filter-group {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    padding: 5px 0;
+}
+
+.result-count {
+    margin-left: auto;
+    padding: 8px 16px;
+    background: #e9ecef;
+    border-radius: 20px;
+    font-size: 13px;
+    color: #495057;
+    font-weight: bold;
+}
+
+.no-results {
+    text-align: center;
+    padding: 40px;
+    color: #6c757d;
+    font-size: 16px;
+}
+
+.btn-stats {
+    background-color: #6c5ce7;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+.btn-stats:hover {
+    background-color: #5f4dd1;
+}
+
+/* 통계 모달 스타일 */
+.stats-modal-content {
+    width: 1600px;
+    max-width: 98%;
+    max-height: 95vh;
+    overflow-y: auto;
+    padding: 25px;
+    margin: 2.5vh auto;
+}
+
+.charts-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-top: 15px;
+}
+
+.chart-wrapper {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    min-width: 0;
+}
+
+.chart-title {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    color: #333;
+    text-align: center;
+}
+
+.chart-container {
+    position: relative;
+    height: 240px;
+    width: 100%;
+}
+
+.btn-add {
+    background-color: #28a745;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+.btn-add:hover {
+    background-color: #218838;
+}
+.inventory-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+.inventory-table th, 
+.inventory-table td {
+    padding: 12px 8px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+.inventory-table th {
+    background-color: #f8f9fa;
+    font-weight: bold;
+    color: #495057;
+}
+.inventory-table tr:hover {
+    background-color: #f1f1f1;
+}
+.status-normal {
+    color: #28a745;
+    font-weight: bold;
+}
+.status-repair {
+    color: #ffc107;
+    font-weight: bold;
+}
+.status-defect {
+    color: #dc3545;
+    font-weight: bold;
+}
+.btn-submit {
+    background-color: #007bff;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+.btn-submit:hover {
+    background-color: #0069d9;
+}
+.btn-cancel {
+    background-color: #6c757d;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-right: 10px;
+    transition: background-color 0.3s;
+}
+.btn-cancel:hover {
+    background-color: #5a6268;
+}
+.form-group {
+    margin-bottom: 15px;
+}
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #555;
+}
+.form-control {
+    width: 100%;
+    padding: 8px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+.form-control:focus {
+    border-color: #80bdff;
+    outline: 0;
+    box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+}
+.modal-footer {
+    margin-top: 20px;
+    text-align: right;
+}
+.field-with-error {
+    border-color: #dc3545;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+.flash-message {
+    padding: 10px 15px;
+    margin-bottom: 15px;
+    border-radius: 4px;
+}
+.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+.no-data {
+    text-align: center;
+    padding: 30px;
+    font-size: 16px;
+    color: #6c757d;
+    font-style: italic;
+}
+.status-row-normal {
+    background-color: rgba(40, 167, 69, 0.05);
+}
+.status-row-repair {
+    background-color: rgba(255, 193, 7, 0.05);
+}
+.status-row-defect {
+    background-color: rgba(220, 53, 69, 0.05);
+}
+.inventory-modal-content {
+    width: 500px;
+    max-width: 90%;
+}
+.action-btn {
+    margin-right: 5px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+}
+.btn-delete {
+    color: #dc3545;
+}
+.btn-edit {
+    color: #007bff;
+}
+.inventory-modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0);
+    transition: background-color 0.3s ease;
+    opacity: 0;
+    z-index: 2000;
+    overflow-y: auto;
+}
+
+.inventory-modal.show {
+    opacity: 1;
+    background-color: rgba(0,0,0,0.5);
+}
+
+.inventory-modal-content {
+    background-color: #ffffff;
+    width: 500px;
+    max-width: 90%;
+    padding: 25px;
+    border-radius: 8px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.7);
+    opacity: 0;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.inventory-modal.show .inventory-modal-content {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+}
+
+.close-button {
+    position: absolute;
+    right: 15px;
+    top: 15px;
+    cursor: pointer;
+    font-size: 24px;
+    color: #666;
+    background: none;
+    border: none;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: color 0.3s;
+}
+
+.close-button:hover {
+    color: #000;
+}
+
+.inventory-modal-content h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: #333;
+    font-size: 22px;
+}
+.btn-excel-export {
+    background-color: #28a745;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+.btn-excel-export:hover {
+    background-color: #218838;
+}
+
+.btn-excel-import {
+    background-color: #17a2b8;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+.btn-excel-import:hover {
+    background-color: #138496;
+}
+.btn-template-download {
+    background-color: #2196F3;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    font-size: 14px;
+    white-space: nowrap;
+}
+.btn-template-download:hover {
+    background-color: #1976D2;
+}
+.btn-template-download i {
+    margin-right: 5px;
+}
+{% endblock %}
+
+{% block content %}
+<div class="inventory-container">
+    <div class="inventory-header">
+        <h1 class="inventory-title">SMARTRING 재고 관리</h1>
+        <div style="display: flex; gap: 10px;">
+            <button class="btn-excel-export" id="exportExcelBtn" type="button">
+                <i class="fas fa-file-excel"></i> Excel 내보내기
+            </button>
+            <button class="btn-excel-import" id="importExcelBtn" type="button">
+                <i class="fas fa-file-upload"></i> Excel 가져오기
+            </button>
+            <button class="btn-stats" id="showStatsBtn" type="button">
+                <i class="fas fa-chart-bar"></i> 통계 보기
+            </button>
+            {% if current_user %}
+            <button class="btn-add" id="addInventoryBtn" type="button">
+                <i class="fas fa-plus"></i> 재고 추가
+            </button>
+            {% else %}
+            <button class="btn-add" style="background-color: #6c757d; cursor: not-allowed;" id="loginRequiredBtn" type="button">
+                <i class="fas fa-plus"></i> 재고 추가
+            </button>
+            {% endif %}
+        </div>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="flash-message {{ category }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- 검색 및 필터 섹션 -->
+    <div class="search-filter-section">
+        <div class="search-bar">
+            <input type="text" 
+                   id="searchInput" 
+                   class="search-input" 
+                   placeholder="MAC 주소 또는 제조번호로 검색...">
+            <button class="clear-button" onclick="clearFilters()">
+                <i class="fas fa-redo"></i> 초기화
+            </button>
+        </div>
+        
+        <div class="filter-section">
+            <div class="filter-group">
+                <span class="filter-label">상태:</span>
+                <button class="filter-btn status-normal" data-filter="status" data-value="정상">
+                    정상
+                </button>
+                <button class="filter-btn status-repair" data-filter="status" data-value="수리중">
+                    수리중
+                </button>
+                <button class="filter-btn status-defect" data-filter="status" data-value="불량">
+                    불량
+                </button>
+            </div>
+            
+            <div class="filter-group">
+                <span class="filter-label">링 사이즈:</span>
+                <select id="sizeFilter" class="form-control" style="width: auto; padding: 6px 12px;">
+                    <option value="">전체</option>
+                    {% for size in range(6, 15) %}
+                    <option value="{{ size }}">{{ size }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="filter-group">
+                <span class="filter-label">색상:</span>
+                <button class="filter-btn" data-filter="color" data-value="검은색">
+                    검은색
+                </button>
+                <button class="filter-btn" data-filter="color" data-value="은색">
+                    은색
+                </button>
+                <button class="filter-btn" data-filter="color" data-value="금색">
+                    금색
+                </button>
+            </div>
+            
+            <div class="filter-group">
+                <span class="filter-label">보관위치:</span>
+                <select id="locationFilter" class="form-control" style="width: auto; padding: 6px 12px;">
+                    <option value="">전체</option>
+                    {% set locations = inventories|map(attribute='location')|unique|list %}
+                    {% for location in locations %}
+                        {% if location %}
+                        <option value="{{ location }}">{{ location }}</option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <span class="result-count" id="resultCount">전체 {{ inventories|length }}개</span>
+        </div>
+    </div>
+
+    <table class="inventory-table">
+        <thead>
+            <tr>
+                <th>번호</th>
+                <th>MAC 주소</th>
+                <th>제조번호</th>
+                <th>등록일자</th>
+                <th>상태</th>
+                <th>링 사이즈</th>
+                <th>색상</th>
+                <th>보관위치</th>
+                <th>수정일자</th>
+                <th>등록자</th>
+                <th>비고</th>
+                <th>관리</th>
+            </tr>
+        </thead>
+        <tbody id="inventoryTableBody">
+            {% if inventories %}
+                {% for inventory in inventories %}
+                <tr class="status-row-{{ inventory.status }} inventory-row" 
+                    data-mac="{{ inventory.mac_address }}"
+                    data-serial="{{ inventory.serial_number }}"
+                    data-status="{{ inventory.status }}"
+                    data-location="{{ inventory.location or '' }}"
+                    data-ring-size="{{ inventory.ring_size or '' }}"
+                    data-color="{{ inventory.color or '' }}">
+                    <td>{{ loop.index }}</td>
+                    <td>{{ inventory.mac_address }}</td>
+                    <td>{{ inventory.serial_number }}</td>
+                    <td>{{ inventory.manufacture_date.strftime('%Y-%m-%d') }}</td>
+                    <td class="status-{{ inventory.status }}">
+                        {{ inventory.status }}
+                    </td>
+                    <td>{{ inventory.ring_size or '-' }}</td>
+                    <td>{{ inventory.color or '-' }}</td>
+                    <td>{{ inventory.location or '-' }}</td>
+                    <td>{{ inventory.updated_at.strftime('%Y-%m-%d') }}</td>
+                    <td>{{ inventory.created_by or '-' }}</td>
+                    <td>{{ inventory.note or '-' }}</td>
+                    <td>
+                        {% if current_user %}
+                            <button class="action-btn btn-edit status-edit-btn" 
+                                    data-id="{{ inventory.id }}" 
+                                    data-status="{{ inventory.status }}" 
+                                    data-note="{{ inventory.note or '' }}" 
+                                    type="button">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            {% if is_admin %}
+                            <button class="action-btn btn-delete delete-inventory-btn" 
+                                    data-id="{{ inventory.id }}" 
+                                    type="button">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                            {% endif %}
+                        {% else %}
+                            <button class="action-btn btn-edit login-required-edit" type="button">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="action-btn btn-delete login-required-delete" type="button">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr id="noDataRow">
+                    <td colspan="12" class="no-data">등록된 재고가 없습니다.</td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
+    
+    <div id="noResults" class="no-results" style="display: none;">
+        <i class="fas fa-search" style="font-size: 48px; margin-bottom: 15px; opacity: 0.5;"></i>
+        <p>검색 결과가 없습니다.</p>
+    </div>
+</div>
+
+<!-- 재고 추가 모달 -->
+<div id="addModal" class="modal inventory-modal">
+    <div class="modal-content inventory-modal-content">
+        <span class="close-button" id="closeAddModal">&times;</span>
+        <h2>SMARTRING 재고 추가</h2>
+        <form action="{{ url_for('add_smartring') }}" method="POST" id="addInventoryForm">
+            <div class="form-group">
+                <label for="mac_address">MAC 주소 <span style="color: #dc3545;">*</span></label>
+                <input type="text" id="mac_address" name="mac_address" class="form-control" 
+                       placeholder="형식: AA:BB:CC:DD:EE:FF" required>
+            </div>
+            <div class="form-group">
+                <label for="serial_number">제조번호 <span style="color: #dc3545;">*</span></label>
+                <input type="text" id="serial_number" name="serial_number" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="manufacture_date">등록일자 <span style="color: #dc3545;">*</span></label>
+                <input type="date" id="manufacture_date" name="manufacture_date" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="status">상태</label>
+                <select id="status" name="status" class="form-control">
+                    <option value="정상">정상</option>
+                    <option value="수리중">수리중</option>
+                    <option value="불량">불량</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="ring_size">링 사이즈</label>
+                <select id="ring_size" name="ring_size" class="form-control">
+                    <option value="">선택 안함</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                    <option value="9">9</option>
+                    <option value="10">10</option>
+                    <option value="11">11</option>
+                    <option value="12">12</option>
+                    <option value="13">13</option>
+                    <option value="14">14</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="color">색상</label>
+                <select id="color" name="color" class="form-control">
+                    <option value="">선택 안함</option>
+                    <option value="검은색">검은색</option>
+                    <option value="은색">은색</option>
+                    <option value="금색">금색</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="location">보관위치 <span style="color: #dc3545;">*</span></label>
+                <input type="text" id="location" name="location" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="note">비고</label>
+                <textarea id="note" name="note" class="form-control" rows="3"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel" id="cancelAddBtn">취소</button>
+                <button type="submit" class="btn-submit">추가</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 상태 변경 모달 -->
+<div id="statusModal" class="modal inventory-modal">
+    <div class="modal-content inventory-modal-content">
+        <span class="close-button" id="closeStatusModal">&times;</span>
+        <h2>SMARTRING 상태 업데이트</h2>
+        <form id="statusForm" action="" method="POST">
+            <div class="form-group">
+                <label for="mac_address_update">MAC 주소 *</label>
+                <input type="text" id="mac_address_update" name="mac_address" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="serial_number_update">제조번호 *</label>
+                <input type="text" id="serial_number_update" name="serial_number" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="status_update">상태</label>
+                <select id="status_update" name="status" class="form-control">
+                    <option value="정상">정상</option>
+                    <option value="수리중">수리중</option>
+                    <option value="불량">불량</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="ring_size_update">링 사이즈</label>
+                <select id="ring_size_update" name="ring_size" class="form-control">
+                    <option value="">선택 안함</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                    <option value="9">9</option>
+                    <option value="10">10</option>
+                    <option value="11">11</option>
+                    <option value="12">12</option>
+                    <option value="13">13</option>
+                    <option value="14">14</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="color_update">색상</label>
+                <select id="color_update" name="color" class="form-control">
+                    <option value="">선택 안함</option>
+                    <option value="검은색">검은색</option>
+                    <option value="은색">은색</option>
+                    <option value="금색">금색</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="location_update">보관위치</label>
+                <input type="text" id="location_update" name="location" class="form-control">
+            </div>
+            <div class="form-group">
+                <label for="note_update">비고</label>
+                <textarea id="note_update" name="note" class="form-control" rows="3"></textarea>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel" id="cancelStatusBtn">취소</button>
+                <button type="submit" class="btn-submit">업데이트</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- 통계 모달 -->
+<div id="statsModal" class="modal inventory-modal">
+    <div class="modal-content inventory-modal-content stats-modal-content">
+        <span class="close-button" id="closeStatsModal">&times;</span>
+        <h2>SMARTRING 재고 통계</h2>
+        
+        <div class="charts-container">
+            <div class="chart-wrapper">
+                <div class="chart-title"><i class="fas fa-chart-pie"></i> 상태별 분포</div>
+                <div class="chart-container">
+                    <canvas id="statusChart"></canvas>
+                </div>
+            </div>
+            
+            {% if stats.size_stats %}
+            <div class="chart-wrapper">
+                <div class="chart-title"><i class="fas fa-ring"></i> 링 사이즈별 재고</div>
+                <div class="chart-container">
+                    <canvas id="sizeChart"></canvas>
+                </div>
+            </div>
+            {% endif %}
+            
+            {% if stats.color_stats %}
+            <div class="chart-wrapper">
+                <div class="chart-title"><i class="fas fa-palette"></i> 색상별 재고</div>
+                <div class="chart-container">
+                    <canvas id="colorChart"></canvas>
+                </div>
+            </div>
+            {% endif %}
+            
+            <div class="chart-wrapper">
+                <div class="chart-title"><i class="fas fa-chart-bar"></i> 전체 현황</div>
+                <div class="chart-container">
+                    <canvas id="overviewChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- Excel 가져오기 모달 -->
+<div id="importModal" class="modal inventory-modal">
+    <div class="modal-content inventory-modal-content">
+        <span class="close-button" id="closeImportModal">&times;</span>
+        <h2>Excel 파일 가져오기</h2>
+        <div style="background-color: #e7f3ff; padding: 15px; border-radius: 5px; margin-bottom: 20px; border-left: 4px solid #2196F3;">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+                <div>
+                    <i class="fas fa-info-circle" style="color: #2196F3; margin-right: 8px;"></i>
+                    <strong>Excel 양식이 필요하신가요?</strong>
+                    <p style="margin: 8px 0 0 24px; color: #666; font-size: 13px;">
+                        템플릿을 다운로드하여 작성 후 업로드하세요.
+                    </p>
+                </div>
+                <button type="button" class="btn-template-download" onclick="downloadTemplate()">
+                    <i class="fas fa-download"></i> 템플릿 다운로드
+                </button>
+            </div>
+        </div>
+        <form action="{{ url_for('import_smartring_inventory') }}" method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                <label>Excel 파일 선택 <span style="color: #dc3545;">*</span></label>
+                <input type="file" name="file" accept=".xlsx,.xls" required class="form-control">
+                <small style="color: #6c757d; margin-top: 5px; display: block;">
+                    * Excel 파일 형식: MAC 주소, 제조번호, 등록일자, 상태, 링 사이즈, 색상, 보관위치, 비고
+                </small>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-cancel" id="cancelImportBtn">취소</button>
+                <button type="submit" class="btn-submit">가져오기</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block additional_scripts %}
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('SMARTRING 페이지 로드됨');
+    // 페이지 로드 애니메이션
+    gsap.from('.inventory-header', {
+        y: -30,
+        opacity: 0,
+        duration: 0.6,
+        ease: 'power2.out'
+    });
+
+    gsap.from('.inventory-header > *', {
+        y: -20,
+        opacity: 0,
+        duration: 0.5,
+        stagger: 0.1,
+        ease: 'power2.out',
+        delay: 0.2
+    });
+
+    // 버튼 애니메이션
+    gsap.from('.inventory-header button', {
+        scale: 0,
+        opacity: 0,
+        duration: 0.5,
+        stagger: 0.1,
+        ease: 'back.out(2)',
+        delay: 0.4
+    });
+
+    // 검색 필터 섹션 애니메이션
+    gsap.from('.search-filter-section', {
+        y: 30,
+        opacity: 0,
+        duration: 0.6,
+        ease: 'power2.out',
+        delay: 0.3
+    });
+
+    // 테이블 애니메이션
+    gsap.from('.inventory-table thead', {
+        y: -20,
+        opacity: 0,
+        duration: 0.5,
+        ease: 'power2.out',
+        delay: 0.5
+    });
+
+    gsap.from('.inventory-table tbody tr', {
+        x: -30,
+        opacity: 0,
+        duration: 0.4,
+        stagger: 0.03,
+        ease: 'power2.out',
+        delay: 0.7
+    });
+
+    // 버튼 호버 효과
+    document.querySelectorAll('.btn-add, .btn-stats, .btn-excel-export, .btn-excel-import').forEach(btn => {
+        btn.addEventListener('mouseenter', function() {
+            gsap.to(this, {
+                scale: 1.05,
+                y: -2,
+                boxShadow: '0 5px 15px rgba(0,0,0,0.2)',
+                duration: 0.3,
+                ease: 'power2.out'
+            });
+        });
+
+        btn.addEventListener('mouseleave', function() {
+            gsap.to(this, {
+                scale: 1,
+                y: 0,
+                boxShadow: '0 0 0 rgba(0,0,0,0)',
+                duration: 0.3,
+                ease: 'power2.out'
+            });
+        });
+    });
+
+    // 테이블 행 호버 효과
+    document.querySelectorAll('.inventory-row').forEach(row => {
+        row.addEventListener('mouseenter', function() {
+            gsap.to(this, {
+                x: 3,
+                scale: 1.01,
+                duration: 0.2,
+                ease: 'power2.out'
+            });
+        });
+
+        row.addEventListener('mouseleave', function() {
+            gsap.to(this, {
+                x: 0,
+                scale: 1,
+                duration: 0.2,
+                ease: 'power2.out'
+            });
+        });
+    });
+
+    // 액션 버튼 호버 효과
+    document.querySelectorAll('.action-btn').forEach(btn => {
+        btn.addEventListener('mouseenter', function() {
+            gsap.to(this, {
+                scale: 1.3,
+                rotation: 5,
+                duration: 0.3,
+                ease: 'back.out(2)'
+            });
+        });
+
+        btn.addEventListener('mouseleave', function() {
+            gsap.to(this, {
+                scale: 1,
+                rotation: 0,
+                duration: 0.3,
+                ease: 'back.out(2)'
+            });
+        });
+    });
+
+    // 필터 버튼 애니메이션
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            if (this.classList.contains('active')) {
+                gsap.from(this, {
+                    scale: 1.2,
+                    duration: 0.3,
+                    ease: 'elastic.out(1, 0.5)'
+                });
+            }
+        });
+    });
+
+    // 모달 오픈 애니메이션 개선
+    const originalShowModal = function(modal) {
+        if (modal) {
+            modal.style.display = 'block';
+            
+            gsap.to(modal, {
+                opacity: 1,
+                duration: 0.3,
+                ease: 'power2.out'
+            });
+            
+            gsap.from(modal.querySelector('.inventory-modal-content'), {
+                scale: 0.7,
+                opacity: 0,
+                y: -50,
+                duration: 0.5,
+                ease: 'back.out(1.7)'
+            });
+            
+            modal.classList.add('show');
+        }
+    };
+    
+    // Chart.js 로드 확인
+    if (typeof Chart === 'undefined') {
+        console.error('Chart.js가 로드되지 않았습니다!');
+        alert('차트 라이브러리를 로드하는 중 오류가 발생했습니다. 페이지를 새로고침해주세요.');
+        return;
+    }
+    
+    var addModal = document.getElementById('addModal');
+    var statusModal = document.getElementById('statusModal');
+    var statsModal = document.getElementById('statsModal');
+    
+    // 통계 모달 관련 변수
+    var statusChart, sizeChart, colorChart, overviewChart;
+    
+    // 필터링 관련 변수
+    var activeFilters = {
+        search: '',
+        status: '',
+        size: '',
+        color: '',
+        location: ''
+    };
+    
+    // 통계 보기 버튼
+    var showStatsBtn = document.getElementById('showStatsBtn');
+    if (showStatsBtn) {
+        showStatsBtn.addEventListener('click', function() {
+            console.log('통계 버튼 클릭됨');
+            if (statsModal) {
+                statsModal.style.display = 'block';
+                statsModal.offsetHeight;
+                statsModal.classList.add('show');
+                
+                // 차트 그리기
+                setTimeout(function() {
+                    drawCharts();
+                }, 100);
+            }
+        });
+    }
+    
+    // 통계 모달 닫기
+    var closeStatsBtn = document.getElementById('closeStatsModal');
+    if (closeStatsBtn) {
+        closeStatsBtn.addEventListener('click', function() {
+            if (statsModal) {
+                statsModal.classList.remove('show');
+                setTimeout(function() {
+                    statsModal.style.display = 'none';
+                    destroyCharts();
+                }, 300);
+            }
+        });
+    }
+    
+    // 차트 그리기 함수
+    function drawCharts() {
+        console.log('차트 그리기 시작');
+        console.log('Chart 객체:', typeof Chart);
+        
+        // 기존 차트 제거
+        destroyCharts();
+        
+        // 상태별 차트 (파이 차트)
+        var statusCtx = document.getElementById('statusChart');
+        if (statusCtx) {
+            console.log('상태 차트 생성 중...');
+            try {
+                statusChart = new Chart(statusCtx.getContext('2d'), {
+                    type: 'pie',
+                    data: {
+                        labels: ['정상', '수리중', '불량'],
+                        datasets: [{
+                            data: [{{ stats.normal }}, {{ stats.repair }}, {{ stats.defect }}],
+                            backgroundColor: [
+                                'rgba(40, 167, 69, 0.8)',
+                                'rgba(255, 193, 7, 0.8)',
+                                'rgba(220, 53, 69, 0.8)'
+                            ],
+                            borderColor: [
+                                'rgba(40, 167, 69, 1)',
+                                'rgba(255, 193, 7, 1)',
+                                'rgba(220, 53, 69, 1)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+                console.log('상태 차트 생성 완료');
+            } catch (error) {
+                console.error('상태 차트 생성 오류:', error);
+            }
+        }
+        
+        {% if stats.size_stats %}
+        // 링 사이즈별 차트 (막대 차트)
+        var sizeCtx = document.getElementById('sizeChart');
+        if (sizeCtx) {
+            console.log('사이즈 차트 생성 중...');
+            try {
+                var sizeLabels = {{ stats.size_stats.keys()|list|tojson }};
+                var sizeData = {{ stats.size_stats.values()|list|tojson }};
+                
+                sizeChart = new Chart(sizeCtx.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: sizeLabels,
+                        datasets: [{
+                            label: '수량',
+                            data: sizeData,
+                            backgroundColor: 'rgba(102, 92, 231, 0.8)',
+                            borderColor: 'rgba(102, 92, 231, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 1
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        }
+                    }
+                });
+                console.log('사이즈 차트 생성 완료');
+            } catch (error) {
+                console.error('사이즈 차트 생성 오류:', error);
+            }
+        }
+        {% endif %}
+        
+        {% if stats.color_stats %}
+        // 색상별 차트 (도넛 차트)
+        var colorCtx = document.getElementById('colorChart');
+        if (colorCtx) {
+            console.log('색상 차트 생성 중...');
+            try {
+                var colorLabels = {{ stats.color_stats.keys()|list|tojson }};
+                var colorData = {{ stats.color_stats.values()|list|tojson }};
+                
+                var colorMap = {
+                    '검은색': 'rgba(51, 51, 51, 0.8)',
+                    '은색': 'rgba(192, 192, 192, 0.8)',
+                    '금색': 'rgba(255, 215, 0, 0.8)'
+                };
+                
+                var colors = colorLabels.map(function(label) {
+                    return colorMap[label] || 'rgba(102, 92, 231, 0.8)';
+                });
+                
+                colorChart = new Chart(colorCtx.getContext('2d'), {
+                    type: 'doughnut',
+                    data: {
+                        labels: colorLabels,
+                        datasets: [{
+                            data: colorData,
+                            backgroundColor: colors,
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+                console.log('색상 차트 생성 완료');
+            } catch (error) {
+                console.error('색상 차트 생성 오류:', error);
+            }
+        }
+        {% endif %}
+        
+        // 전체 현황 차트 (막대 차트)
+        var overviewCtx = document.getElementById('overviewChart');
+        if (overviewCtx) {
+            console.log('전체 현황 차트 생성 중...');
+            try {
+                overviewChart = new Chart(overviewCtx.getContext('2d'), {
+                    type: 'bar',
+                    data: {
+                        labels: ['전체', '정상', '수리중', '불량'],
+                        datasets: [{
+                            label: '수량',
+                            data: [{{ stats.total }}, {{ stats.normal }}, {{ stats.repair }}, {{ stats.defect }}],
+                            backgroundColor: [
+                                'rgba(79, 172, 254, 0.8)',
+                                'rgba(40, 167, 69, 0.8)',
+                                'rgba(255, 193, 7, 0.8)',
+                                'rgba(220, 53, 69, 0.8)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    stepSize: 1
+                                }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        }
+                    }
+                });
+                console.log('전체 현황 차트 생성 완료');
+            } catch (error) {
+                console.error('전체 현황 차트 생성 오류:', error);
+            }
+        }
+    }
+    
+    // 차트 제거 함수
+    function destroyCharts() {
+        if (statusChart) {
+            statusChart.destroy();
+            statusChart = null;
+        }
+        if (sizeChart) {
+            sizeChart.destroy();
+            sizeChart = null;
+        }
+        if (colorChart) {
+            colorChart.destroy();
+            colorChart = null;
+        }
+        if (overviewChart) {
+            overviewChart.destroy();
+            overviewChart = null;
+        }
+    }
+    
+    // 재고 추가 버튼
+    var addBtn = document.getElementById('addInventoryBtn');
+    if (addBtn) {
+        addBtn.addEventListener('click', function() {
+            if (addModal) {
+                addModal.style.display = 'block';
+                addModal.offsetHeight;
+                addModal.classList.add('show');
+            }
+        });
+    }
+    
+    // 로그인 필요 버튼
+    var loginRequiredBtn = document.getElementById('loginRequiredBtn');
+    if (loginRequiredBtn) {
+        loginRequiredBtn.addEventListener('click', function() {
+            alert('재고를 추가하려면 로그인이 필요합니다.');
+        });
+    }
+    
+    // 로그인 필요 편집/삭제 버튼
+    var loginRequiredEditBtns = document.querySelectorAll('.login-required-edit');
+    var loginRequiredDeleteBtns = document.querySelectorAll('.login-required-delete');
+    
+    loginRequiredEditBtns.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            alert('재고 상태를 수정하려면 로그인이 필요합니다.');
+        });
+    });
+    
+    loginRequiredDeleteBtns.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            alert('재고를 삭제하려면 로그인이 필요합니다.');
+        });
+    });
+    
+    // 검색 입력 이벤트
+    document.getElementById('searchInput').addEventListener('input', function(e) {
+        activeFilters.search = e.target.value.toLowerCase();
+        applyFilters();
+    });
+
+    // 링 사이즈 필터
+    document.getElementById('sizeFilter').addEventListener('change', function(e) {
+        activeFilters.size = e.target.value;
+        applyFilters();
+    });
+
+    // 보관위치 필터
+    document.getElementById('locationFilter').addEventListener('change', function(e) {
+        activeFilters.location = e.target.value;
+        applyFilters();
+    });
+
+    // 상태 필터 버튼
+    document.querySelectorAll('.filter-btn[data-filter="status"]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var value = this.getAttribute('data-value');
+            
+            if (this.classList.contains('active')) {
+                this.classList.remove('active');
+                activeFilters.status = '';
+            } else {
+                document.querySelectorAll('.filter-btn[data-filter="status"]').forEach(function(b) {
+                    b.classList.remove('active');
+                });
+                this.classList.add('active');
+                activeFilters.status = value;
+            }
+            
+            applyFilters();
+        });
+    });
+
+    // 색상 필터 버튼
+    document.querySelectorAll('.filter-btn[data-filter="color"]').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var value = this.getAttribute('data-value');
+            
+            if (this.classList.contains('active')) {
+                this.classList.remove('active');
+                activeFilters.color = '';
+            } else {
+                document.querySelectorAll('.filter-btn[data-filter="color"]').forEach(function(b) {
+                    b.classList.remove('active');
+                });
+                this.classList.add('active');
+                activeFilters.color = value;
+            }
+            
+            applyFilters();
+        });
+    });
+
+    // 필터 적용 함수
+    window.applyFilters = function() {
+        var rows = document.querySelectorAll('.inventory-row');
+        var visibleCount = 0;
+        
+        rows.forEach(function(row) {
+            var mac = row.getAttribute('data-mac').toLowerCase();
+            var serial = row.getAttribute('data-serial').toLowerCase();
+            var status = row.getAttribute('data-status');
+            var location = row.getAttribute('data-location');
+            var ringSize = row.getAttribute('data-ring-size');
+            var color = row.getAttribute('data-color');
+            
+            var matchSearch = true;
+            var matchStatus = true;
+            var matchLocation = true;
+            var matchSize = true;
+            var matchColor = true;
+            
+            if (activeFilters.search) {
+                matchSearch = mac.includes(activeFilters.search) || 
+                             serial.includes(activeFilters.search);
+            }
+            
+            if (activeFilters.status) {
+                matchStatus = status === activeFilters.status;
+            }
+            
+            if (activeFilters.location) {
+                matchLocation = location === activeFilters.location;
+            }
+            
+            if (activeFilters.size) {
+                matchSize = ringSize === activeFilters.size;
+            }
+            
+            if (activeFilters.color) {
+                matchColor = color === activeFilters.color;
+            }
+            
+            if (matchSearch && matchStatus && matchLocation && matchSize && matchColor) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+        
+        updateResultCount(visibleCount);
+        
+        var noResults = document.getElementById('noResults');
+        var noDataRow = document.getElementById('noDataRow');
+        
+        if (visibleCount === 0 && rows.length > 0) {
+            noResults.style.display = 'block';
+            if (noDataRow) noDataRow.style.display = 'none';
+        } else {
+            noResults.style.display = 'none';
+            if (noDataRow && rows.length === 0) noDataRow.style.display = '';
+        }
+    };
+
+    function updateResultCount(count) {
+        var resultCount = document.getElementById('resultCount');
+        var totalCount = document.querySelectorAll('.inventory-row').length;
+        
+        var hasActiveFilter = activeFilters.search || activeFilters.status || 
+                             activeFilters.location || activeFilters.size || activeFilters.color;
+        
+        if (hasActiveFilter) {
+            resultCount.textContent = count + '개 (전체 ' + totalCount + '개)';
+        } else {
+            resultCount.textContent = '전체 ' + totalCount + '개';
+        }
+    }
+
+    window.clearFilters = function() {
+        document.getElementById('searchInput').value = '';
+        
+        document.querySelectorAll('.filter-btn').forEach(function(btn) {
+            btn.classList.remove('active');
+        });
+        
+        document.getElementById('sizeFilter').value = '';
+        document.getElementById('locationFilter').value = '';
+        
+        activeFilters = {
+            search: '',
+            status: '',
+            size: '',
+            color: '',
+            location: ''
+        };
+        
+        applyFilters();
+    };
+    
+    var statusBtns = document.querySelectorAll('.status-edit-btn');
+    statusBtns.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var id = this.getAttribute('data-id');
+            var status = this.getAttribute('data-status');
+            var note = this.getAttribute('data-note');
+            
+            var row = this.closest('tr');
+            var macAddress = row.getAttribute('data-mac');
+            var serialNumber = row.getAttribute('data-serial');
+            var location = row.getAttribute('data-location');
+            var ringSize = row.getAttribute('data-ring-size');
+            var color = row.getAttribute('data-color');
+            
+            var statusForm = document.getElementById('statusForm');
+            statusForm.action = '/smartring/update-status/' + id;
+            
+            document.getElementById('mac_address_update').value = macAddress;
+            document.getElementById('serial_number_update').value = serialNumber;
+            document.getElementById('status_update').value = status;
+            document.getElementById('location_update').value = location;
+            document.getElementById('ring_size_update').value = ringSize;
+            document.getElementById('color_update').value = color;
+            document.getElementById('note_update').value = note;
+            
+            if (statusModal) {
+                statusModal.style.display = 'block';
+                statusModal.offsetHeight;
+                statusModal.classList.add('show');
+            }
+        });
+    });
+    
+    var deleteButtons = document.querySelectorAll('.delete-inventory-btn');
+    deleteButtons.forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var inventoryId = this.getAttribute('data-id');
+            
+            if (confirm('정말로 이 장비를 삭제하시겠습니까?')) {
+                window.location.href = '/smartring/delete/' + inventoryId;
+            }
+        });
+    });
+    
+    var closeStatusBtn = document.getElementById('closeStatusModal');
+    var cancelStatusBtn = document.getElementById('cancelStatusBtn');
+    
+    if (closeStatusBtn) {
+        closeStatusBtn.addEventListener('click', function() {
+            if (statusModal) {
+                statusModal.classList.remove('show');
+                setTimeout(function() {
+                    statusModal.style.display = 'none';
+                }, 300);
+            }
+        });
+    }
+    
+    if (cancelStatusBtn) {
+        cancelStatusBtn.addEventListener('click', function() {
+            if (statusModal) {
+                statusModal.classList.remove('show');
+                setTimeout(function() {
+                    statusModal.style.display = 'none';
+                }, 300);
+            }
+        });
+    }
+    
+    var closeAddBtn = document.getElementById('closeAddModal');
+    var cancelAddBtn = document.getElementById('cancelAddBtn');
+    
+    if (closeAddBtn) {
+        closeAddBtn.addEventListener('click', function() {
+            if (addModal) {
+                addModal.classList.remove('show');
+                setTimeout(function() {
+                    addModal.style.display = 'none';
+                }, 300);
+            }
+        });
+    }
+    
+    if (cancelAddBtn) {
+        cancelAddBtn.addEventListener('click', function() {
+            if (addModal) {
+                addModal.classList.remove('show');
+                setTimeout(function() {
+                    addModal.style.display = 'none';
+                }, 300);
+            }
+        });
+    }
+    
+    function validateMacAddress(input) {
+        var macPattern = /^([0-9A-Za-z]{2}[:-]){5}([0-9A-Za-z]{2})$/;
+        return macPattern.test(input.value);
+    }
+    
+    var macInput = document.getElementById('mac_address');
+    if (macInput) {
+        macInput.addEventListener('input', function(e) {
+            var value = e.target.value.replace(/[^0-9a-zA-Z]/g, '').toUpperCase();
+            var formattedValue = '';
+            
+            for (var i = 0; i < value.length && i < 12; i++) {
+                if (i > 0 && i % 2 === 0) {
+                    formattedValue += ':';
+                }
+                formattedValue += value[i];
+            }
+            
+            e.target.value = formattedValue;
+        });
+    }
+    
+    var macUpdateInput = document.getElementById('mac_address_update');
+    if (macUpdateInput) {
+        macUpdateInput.addEventListener('input', function(e) {
+            var value = e.target.value.replace(/[^0-9a-zA-Z]/g, '').toUpperCase();
+            var formattedValue = '';
+            
+            for (var i = 0; i < value.length && i < 12; i++) {
+                if (i > 0 && i % 2 === 0) {
+                    formattedValue += ':';
+                }
+                formattedValue += value[i];
+            }
+            
+            e.target.value = formattedValue;
+        });
+    }
+    
+    var addForm = document.getElementById('addInventoryForm');
+    if (addForm) {
+        addForm.addEventListener('submit', function(e) {
+            var isValid = true;
+            var errorMessages = [];
+            
+            var macInput = document.getElementById('mac_address');
+            if (!macInput.value.trim()) {
+                isValid = false;
+                macInput.classList.add('field-with-error');
+                errorMessages.push('MAC 주소를 입력해주세요.');
+            } else if (!validateMacAddress(macInput)) {
+                isValid = false;
+                macInput.classList.add('field-with-error');
+                errorMessages.push('올바른 MAC 주소 형식이 아닙니다. (형식: AA:BB:CC:DD:EE:FF)');
+            } else {
+                macInput.classList.remove('field-with-error');
+            }
+            
+            var serialInput = document.getElementById('serial_number');
+            if (!serialInput.value.trim()) {
+                isValid = false;
+                serialInput.classList.add('field-with-error');
+                errorMessages.push('제조번호를 입력해주세요.');
+            } else {
+                serialInput.classList.remove('field-with-error');
+            }
+            
+            var dateInput = document.getElementById('manufacture_date');
+            if (!dateInput.value) {
+                isValid = false;
+                dateInput.classList.add('field-with-error');
+                errorMessages.push('등록일자를 선택해주세요.');
+            } else {
+                dateInput.classList.remove('field-with-error');
+            }
+
+            var locationInput = document.getElementById('location');
+            if (!locationInput.value.trim()) {
+                isValid = false;
+                locationInput.classList.add('field-with-error');
+                errorMessages.push('보관위치를 입력해주세요.');
+            } else {
+                locationInput.classList.remove('field-with-error');
+            }
+            
+            if (!isValid) {
+                e.preventDefault();
+                alert(errorMessages.join('\n'));
+            }
+        });
+    }
+    // Excel 내보내기 버튼
+    var exportExcelBtn = document.getElementById('exportExcelBtn');
+    if (exportExcelBtn) {
+        exportExcelBtn.addEventListener('click', function() {
+            window.location.href = '/smartring/export';
+        });
+    }
+
+    // Excel 가져오기 버튼
+    var importExcelBtn = document.getElementById('importExcelBtn');
+    var importModal = document.getElementById('importModal');
+
+    if (importExcelBtn) {
+        importExcelBtn.addEventListener('click', function() {
+            if (importModal) {
+                importModal.style.display = 'block';
+                importModal.offsetHeight;
+                importModal.classList.add('show');
+            }
+        });
+    }
+
+    // Excel 가져오기 모달 닫기
+    var closeImportBtn = document.getElementById('closeImportModal');
+    var cancelImportBtn = document.getElementById('cancelImportBtn');
+
+    if (closeImportBtn) {
+        closeImportBtn.addEventListener('click', function() {
+            if (importModal) {
+                importModal.classList.remove('show');
+                setTimeout(function() {
+                    importModal.style.display = 'none';
+                }, 300);
+            }
+        });
+    }
+
+    if (cancelImportBtn) {
+        cancelImportBtn.addEventListener('click', function() {
+            if (importModal) {
+                importModal.classList.remove('show');
+                setTimeout(function() {
+                    importModal.style.display = 'none';
+                }, 300);
+            }
+        });
+    }
+    updateResultCount(document.querySelectorAll('.inventory-row').length);
+});
+function downloadTemplate() {
+    window.location.href = '/smartring/template';
+}
+{% endblock %}

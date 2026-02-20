@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>나의 정보</title>
+    <style>
+        .myinfo-container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+        
+        .myinfo-header {
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .myinfo-header h1 {
+            font-size: 28px;
+            color: #333;
+        }
+        
+        .info-section {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .section-title {
+            font-size: 20px;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .info-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .info-label {
+            width: 120px;
+            font-weight: bold;
+            color: #555;
+        }
+        
+        .info-value {
+            flex: 1;
+            color: #333;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #555;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+        
+        .form-control:focus {
+            border-color: #007bff;
+            outline: none;
+            box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #0056b3;
+        }
+        
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+        
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+        
+        .flash-message {
+            padding: 12px 20px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .danger-zone {
+            background-color: #fff5f5;
+            border: 1px solid #dc3545;
+        }
+        
+        .danger-zone .section-title {
+            color: #dc3545;
+        }
+        
+        .warning-text {
+            color: #856404;
+            background-color: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-size: 13px;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        hr {
+            margin: 30px 0;
+            border: none;
+            border-top: 1px solid #eee;
+        }
+    </style>
+</head>
+<body>
+    {% extends "menu.html" %}
+    
+    {% block title %}나의 정보{% endblock %}
+    
+    {% block additional_styles %}
+    .myinfo-container {
+        max-width: 800px;
+        margin: 20px auto;
+        padding: 20px;
+    }
+    {% endblock %}
+    
+    {% block content %}
+    <div class="myinfo-container">
+        <div class="myinfo-header">
+            <h1>나의 정보</h1>
+        </div>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message {{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <!-- 기본 정보 -->
+        <div class="info-section">
+            <h2 class="section-title">기본 정보</h2>
+            <div class="info-row">
+                <span class="info-label">아이디:</span>
+                <span class="info-value">{{ user.userid }}</span>
+            </div>
+            <div class="info-row">
+                <span class="info-label">가입일:</span>
+                <span class="info-value">가입 정보</span>
+            </div>
+        </div>
+        
+        <!-- 비밀번호 변경 -->
+        <div class="info-section">
+            <h2 class="section-title">비밀번호 변경</h2>
+            <form action="/change_password" method="POST">
+                <div class="form-group">
+                    <label for="current_password">현재 비밀번호</label>
+                    <input type="password" id="current_password" name="current_password" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="new_password">새 비밀번호</label>
+                    <input type="password" id="new_password" name="new_password" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="confirm_password">새 비밀번호 확인</label>
+                    <input type="password" id="confirm_password" name="confirm_password" class="form-control" required>
+                </div>
+                <button type="submit" class="btn btn-primary">비밀번호 변경</button>
+            </form>
+        </div>
+        
+        <hr>
+        
+        <!-- 회원 탈퇴 -->
+        <div class="info-section danger-zone">
+            <h2 class="section-title">회원 탈퇴</h2>
+            <div class="warning-text">
+                <strong>⚠️ 주의:</strong> 회원 탈퇴 시 모든 게시글, 댓글 및 계정 정보가 영구적으로 삭제됩니다. 이 작업은 되돌릴 수 없습니다.
+            </div>
+            <form action="/delete_account" method="POST" onsubmit="return confirmDelete()">
+                <div class="form-group">
+                    <label for="delete_password">비밀번호 확인</label>
+                    <input type="password" id="delete_password" name="password" class="form-control" required placeholder="탈퇴하려면 비밀번호를 입력하세요">
+                </div>
+                <button type="submit" class="btn btn-danger">회원 탈퇴</button>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        function confirmDelete() {
+            return confirm('정말로 회원 탈퇴하시겠습니까?\n\n탈퇴 시 모든 데이터가 영구적으로 삭제되며 복구할 수 없습니다.');
+        }
+        
+        // 비밀번호 확인 검증
+        document.querySelector('form[action="/change_password"]').addEventListener('submit', function(e) {
+            const newPassword = document.getElementById('new_password').value;
+            const confirmPassword = document.getElementById('confirm_password').value;
+            
+            if (newPassword !== confirmPassword) {
+                e.preventDefault();
+                alert('새 비밀번호가 일치하지 않습니다.');
+                return false;
+            }
+            
+            if (newPassword.length < 4) {
+                e.preventDefault();
+                alert('비밀번호는 최소 4자 이상이어야 합니다.');
+                return false;
+            }
+        });
+    </script>
+    {% endblock %}
+</body>
+</html>

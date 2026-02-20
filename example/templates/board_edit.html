@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>게시글 수정</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .edit-container {
+            width: 85%;
+            margin: 20px auto;
+        }
+        .edit-header {
+            margin-bottom: 20px;
+            border-bottom: 2px solid #333;
+            padding-bottom: 10px;
+        }
+        .edit-form {
+            width: 100%;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+        }
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        .form-textarea {
+            min-height: 300px;
+            resize: vertical;
+        }
+        .button-group {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .submit-btn {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .submit-btn:hover {
+            background-color: #0056b3;
+        }
+        .cancel-btn {
+            background-color: #6c757d;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 16px;
+        }
+        .cancel-btn:hover {
+            background-color: #5a6268;
+        }
+        .editor-toolbar {
+            padding: 10px;
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            border-radius: 4px 4px 0 0;
+        }
+        .editor-toolbar button {
+            background: none;
+            border: none;
+            padding: 5px 10px;
+            margin-right: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .editor-toolbar button:hover {
+            background-color: #e9ecef;
+            border-radius: 4px;
+        }
+        .flash-message {
+            padding: 10px 15px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .image-preview {
+            max-width: 300px;
+            max-height: 200px;
+            margin-top: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .file-input-container {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+        }
+        .file-input-label {
+            display: inline-block;
+            background-color: #6c757d;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        .file-input-label:hover {
+            background-color: #5a6268;
+        }
+        .file-name {
+            display: inline-block;
+            vertical-align: middle;
+            color: #495057;
+            font-size: 14px;
+        }
+        .remove-image-option {
+            margin-top: 10px;
+            display: flex;
+            align-items: center;
+        }
+        .remove-image-option input {
+            margin-right: 5px;
+        }
+        .remove-image-btn {
+            margin-left: 10px;
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .remove-image-btn:hover {
+            background-color: #c82333;
+        }
+        .image-preview-container {
+            margin-top: 10px;
+            position: relative;
+        }
+    </style>
+</head>
+<body>
+    {% extends "menu.html" %}
+
+    {% block title %}게시글 수정{% endblock %}
+
+    {% block additional_styles %}
+    .edit-container {
+        width: 85%;
+        margin: 20px auto;
+    }
+    /* 기존 스타일 유지 */
+    {% endblock %}
+
+    {% block content %}
+    <div class="edit-container">
+        <div class="edit-header">
+            <h1>게시글 수정</h1>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message {{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <form class="edit-form" action="{{ url_for('board_edit_post', post_id=post.id) }}" method="POST" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="title">제목</label>
+                <input type="text" id="title" name="title" class="form-control" value="{{ post.title }}" required>
+            </div>
+            <div class="form-group">
+                <label for="content">내용</label>
+                <div class="editor-toolbar">
+                    <button type="button" onclick="formatText('bold')"><i class="fas fa-bold"></i></button>
+                    <button type="button" onclick="formatText('italic')"><i class="fas fa-italic"></i></button>
+                    <button type="button" onclick="formatText('underline')"><i class="fas fa-underline"></i></button>
+                    <button type="button" onclick="formatText('strikethrough')"><i class="fas fa-strikethrough"></i></button>
+                    <button type="button" onclick="insertList('ol')"><i class="fas fa-list-ol"></i></button>
+                    <button type="button" onclick="insertList('ul')"><i class="fas fa-list-ul"></i></button>
+                    <button type="button" onclick="insertImage()"><i class="fas fa-image"></i></button>
+                </div>
+                <textarea id="content" name="content" class="form-control form-textarea" required>{{ post.content }}</textarea>
+            </div>
+            <div class="form-group">
+                <label for="image">이미지 첨부</label>
+                <div class="file-input-container">
+                    <label for="image" class="file-input-label">
+                        <i class="fas fa-upload"></i> 파일 선택
+                    </label>
+                    <span class="file-name" id="file-name">
+                        {% if post.image_filename %}
+                            {{ post.image_filename }}
+                        {% else %}
+                            선택된 파일 없음
+                        {% endif %}
+                    </span>
+                    <button type="button" id="remove-image-btn" class="remove-image-btn" style="display: {% if post.image_filename or selected_new_file %}flex{% else %}none{% endif %};">
+                        <i class="fas fa-times"></i>
+                    </button>
+                    <input type="file" id="image" name="image" style="display: none;" accept="image/png, image/jpeg, image/gif">
+                </div>
+                
+                {% if post.image_filename %}
+                    <div class="image-preview-container">
+                        <img id="image-preview" class="image-preview" src="{{ url_for('static', filename='uploads/' + post.image_filename) }}" alt="이미지 미리보기">
+                        <div class="remove-image-option">
+                            <input type="checkbox" id="remove_image" name="remove_image" value="yes">
+                            <label for="remove_image">이미지 삭제</label>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="image-preview-container">
+                        <img id="image-preview" class="image-preview" style="display: none;" src="" alt="이미지 미리보기">
+                    </div>
+                {% endif %}
+            </div>
+            <div class="button-group">
+                <a href="{{ url_for('board_view', post_id=post.id) }}" class="cancel-btn">취소</a>
+                <button type="submit" class="submit-btn">수정하기</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        function formatText(command) {
+            document.execCommand(command, false, null);
+            document.getElementById('content').focus();
+        }
+
+        function insertList(type) {
+            const textarea = document.getElementById('content');
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+            const text = textarea.value;
+            const selectedText = text.substring(start, end);
+            
+            let newText = '';
+            if (type === 'ul') {
+                const lines = selectedText.split('\n');
+                newText = lines.map(line => line ? '• ' + line : line).join('\n');
+            } else if (type === 'ol') {
+                const lines = selectedText.split('\n');
+                newText = lines.map((line, i) => line ? (i+1) + '. ' + line : line).join('\n');
+            }
+            
+            textarea.value = text.substring(0, start) + newText + text.substring(end);
+            textarea.selectionStart = start;
+            textarea.selectionEnd = start + newText.length;
+            textarea.focus();
+        }
+
+        function insertImage() {
+            document.getElementById('image').click();
+        }
+
+        // 이미지 선택 초기화 함수
+        function clearImageSelection() {
+            const fileInput = document.getElementById('image');
+            fileInput.value = '';
+            
+            const filenameDisplay = document.getElementById('file-name');
+            {% if post.image_filename %}
+                filenameDisplay.textContent = "{{ post.image_filename }}";
+            {% else %}
+                filenameDisplay.textContent = "선택된 파일 없음";
+            {% endif %}
+            
+            const preview = document.getElementById('image-preview');
+            {% if post.image_filename %}
+                preview.src = "{{ url_for('static', filename='uploads/' + post.image_filename) }}";
+                preview.style.display = 'block';
+                
+                const removeCheckbox = document.getElementById('remove_image');
+                if (removeCheckbox) {
+                    removeCheckbox.checked = false;
+                    preview.style.opacity = 1;
+                }
+            {% else %}
+                preview.style.display = 'none';
+                preview.src = '';
+            {% endif %}
+            
+            {% if post.image_filename %}
+                document.getElementById('remove-image-btn').style.display = 'flex';
+            {% else %}
+                document.getElementById('remove-image-btn').style.display = 'none';
+            {% endif %}
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const removeBtn = document.getElementById('remove-image-btn');
+            if (removeBtn) {
+                removeBtn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    clearImageSelection();
+                });
+            }
+            
+            // 파일 입력 변경 핸들러 수정
+            const fileInput = document.getElementById('image');
+            if (fileInput) {
+                fileInput.addEventListener('change', function(e) {
+                    const fileName = e.target.files[0] ? e.target.files[0].name : '{% if post.image_filename %}{{ post.image_filename }}{% else %}선택된 파일 없음{% endif %}';
+                    document.getElementById('file-name').textContent = fileName;
+                    
+                    const removeBtn = document.getElementById('remove-image-btn');
+                    
+                    const preview = document.getElementById('image-preview');
+                    if (e.target.files && e.target.files[0]) {
+                        removeBtn.style.display = 'flex';
+                        
+                        const reader = new FileReader();
+                        reader.onload = function(e) {
+                            preview.src = e.target.result;
+                            preview.style.display = 'block';
+                        }
+                        
+                        reader.readAsDataURL(e.target.files[0]);
+                        
+                        // 이미지 삭제 체크박스 체크 해제
+                        const removeCheckbox = document.getElementById('remove_image');
+                        if (removeCheckbox) {
+                            removeCheckbox.checked = false;
+                            preview.style.opacity = 1;
+                        }
+                    } else {
+                        removeBtn.style.display = '{% if post.image_filename %}flex{% else %}none{% endif %}';
+                        
+                        {% if post.image_filename %}
+                            preview.src = "{{ url_for('static', filename='uploads/' + post.image_filename) }}";
+                            preview.style.display = 'block';
+                        {% else %}
+                            preview.style.display = 'none';
+                        {% endif %}
+                    }
+                });
+            }
+            
+            // 이미지 삭제 체크박스 처리
+            const removeCheckbox = document.getElementById('remove_image');
+            if (removeCheckbox) {
+                removeCheckbox.addEventListener('change', function() {
+                    const preview = document.getElementById('image-preview');
+                    if (this.checked) {
+                        preview.style.opacity = 0.3;
+                    } else {
+                        preview.style.opacity = 1;
+                    }
+                });
+            }
+        });
+    </script>
+    {% endblock %}
+    {% block additional_scripts %}
+    document.addEventListener('DOMContentLoaded', function() {
+        // 헤더 애니메이션
+        gsap.from('.write-header, .edit-header', {
+            y: -30,
+            opacity: 0,
+            duration: 0.6,
+            ease: 'power2.out'
+        });
+
+        // 폼 그룹 순차 애니메이션
+        gsap.from('.form-group', {
+            x: -30,
+            opacity: 0,
+            duration: 0.5,
+            stagger: 0.1,
+            ease: 'power2.out',
+            delay: 0.2
+        });
+
+        // 에디터 툴바 애니메이션
+        gsap.from('.editor-toolbar button', {
+            scale: 0,
+            opacity: 0,
+            duration: 0.3,
+            stagger: 0.05,
+            ease: 'back.out(2)',
+            delay: 0.5
+        });
+
+        // 버튼 그룹 애니메이션
+        gsap.from('.button-group button, .button-group a', {
+            scale: 0,
+            opacity: 0,
+            duration: 0.5,
+            stagger: 0.1,
+            ease: 'back.out(2)',
+            delay: 0.7
+        });
+
+        // 툴바 버튼 호버 효과
+        document.querySelectorAll('.editor-toolbar button').forEach(btn => {
+            btn.addEventListener('mouseenter', function() {
+                gsap.to(this, {
+                    scale: 1.2,
+                    backgroundColor: '#dee2e6',
+                    duration: 0.2,
+                    ease: 'power2.out'
+                });
+            });
+
+            btn.addEventListener('mouseleave', function() {
+                gsap.to(this, {
+                    scale: 1,
+                    backgroundColor: 'transparent',
+                    duration: 0.2,
+                    ease: 'power2.out'
+                });
+            });
+        });
+
+        // 입력 필드 포커스 효과
+        document.querySelectorAll('.form-control').forEach(input => {
+            input.addEventListener('focus', function() {
+                gsap.to(this, {
+                    scale: 1.02,
+                    boxShadow: '0 0 15px rgba(0,123,255,0.3)',
+                    duration: 0.3,
+                    ease: 'power2.out'
+                });
+            });
+
+            input.addEventListener('blur', function() {
+                gsap.to(this, {
+                    scale: 1,
+                    boxShadow: 'none',
+                    duration: 0.3,
+                    ease: 'power2.out'
+                });
+            });
+        });
+    });
+    {% endblock %}
+</body>
+</html>

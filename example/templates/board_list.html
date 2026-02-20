@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>게시판</title>
+    <style>
+        .board-container {
+            width: 85%;
+            margin: 20px auto;
+        }
+        .board-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .board-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        .board-table th,
+        .board-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        .board-table th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+            border-top: 2px solid #333;
+        }
+        .board-table tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+        .board-table .center {
+            text-align: center;
+        }
+        .board-table .id-column {
+            width: 8%;
+        }
+        .board-table .title-column {
+            width: 50%;
+        }
+        .board-table .author-column,
+        .board-table .date-column {
+            width: 15%;
+        }
+        .board-table .views-column {
+            width: 12%;
+        }
+        .write-btn {
+            background-color: #007bff;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 14px;
+            margin-top: 20px;
+        }
+        .write-btn:hover {
+            background-color: #0056b3;
+        }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            list-style: none;
+            padding: 0;
+            margin-top: 30px;
+        }
+        .pagination li {
+            margin: 0 5px;
+        }
+        .pagination a {
+            text-decoration: none;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            color: #007bff;
+            border-radius: 4px;
+        }
+        .pagination a:hover {
+            background-color: #f8f9fa;
+        }
+        .pagination .active a {
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+        .no-posts {
+            text-align: center;
+            padding: 50px 0;
+            color: #6c757d;
+        }
+        .flash-message {
+            padding: 10px 15px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .search-section {
+            margin-bottom: 20px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .search-form {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        .search-input {
+            flex: 1;
+            padding: 10px 15px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        .search-input:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+        
+        .search-btn {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+            white-space: nowrap;
+        }
+        
+        .search-btn:hover {
+            background-color: #0056b3;
+        }
+        
+        .clear-search-btn {
+            background-color: #6c757d;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 14px;
+            transition: background-color 0.3s;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .clear-search-btn:hover {
+            background-color: #5a6268;
+        }
+        
+        .search-result-info {
+            margin-top: 15px;
+            padding: 10px 15px;
+            background-color: #e7f3ff;
+            border-left: 4px solid #007bff;
+            border-radius: 4px;
+            color: #004085;
+        }
+        
+        .no-posts {
+            text-align: center;
+            padding: 50px 0;
+            color: #6c757d;
+        }
+        
+        /* 반응형 디자인 */
+        @media (max-width: 768px) {
+            .search-form {
+                flex-direction: column;
+            }
+            
+            .search-input {
+                width: 100%;
+            }
+            
+            .search-btn,
+            .clear-search-btn {
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    {% extends "menu.html" %}
+
+    {% block title %}게시판{% endblock %}
+
+    {% block additional_styles %}
+    .board-container {
+        width: 85%;
+        margin: 20px auto;
+    }
+    /* 기존 스타일 유지 */
+    {% endblock %}
+
+    {% block content %}
+    <div class="board-container">
+        <div class="board-header">
+            <h1>게시판</h1>
+            {% if current_user %}
+            <a href="{{ url_for('board_write') }}" class="write-btn">글쓰기</a>
+            {% endif %}
+        </div>
+
+        <div class="search-section">
+            <form action="{{ url_for('board_search') }}" method="GET" class="search-form">
+                <input type="text" 
+                    name="q" 
+                    class="search-input" 
+                    placeholder="제목, 내용, 작성자로 검색..." 
+                    value="{{ keyword or '' }}">
+                <button type="submit" class="search-btn">
+                    <i class="fas fa-search"></i> 검색
+                </button>
+                {% if keyword %}
+                <a href="{{ url_for('board_list') }}" class="clear-search-btn">
+                    <i class="fas fa-times"></i> 초기화
+                </a>
+                {% endif %}
+            </form>
+            {% if keyword %}
+            <div class="search-result-info">
+                '<strong>{{ keyword }}</strong>' 검색 결과
+            </div>
+            {% endif %}
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message {{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <table class="board-table">
+            <thead>
+                <tr>
+                    <th class="center id-column">번호</th>
+                    <th class="title-column">제목</th>
+                    <th class="author-column">작성자</th>
+                    <th class="date-column">작성일</th>
+                    <th class="center views-column">조회수</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if posts %}
+                    {% for post in posts %}
+                    <tr>
+                        <td class="center">{{ post.id }}</td>
+                        <td><a href="{{ url_for('board_view', post_id=post.id) }}">{{ post.title }}</a></td>
+                        <td>{{ post.author }}</td>
+                        <td>{{ post.created_at.strftime('%Y-%m-%d') }}</td>
+                        <td class="center">{{ post.views }}</td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="5" class="no-posts">
+                            {% if keyword %}
+                                '<strong>{{ keyword }}</strong>'에 대한 검색 결과가 없습니다.
+                            {% else %}
+                                등록된 게시글이 없습니다.
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+
+        <!-- 페이지네이션 -->
+        {% if total_pages > 1 %}
+        <ul class="pagination">
+            {% if current_page > 1 %}
+                <li><a href="{{ url_for('board_search' if keyword else 'board_list', page=current_page-1, q=keyword) }}">&laquo;</a></li>
+            {% endif %}
+                
+            {% for i in range(1, total_pages + 1) %}
+                <li class="{{ 'active' if i == current_page else '' }}">
+                    <a href="{{ url_for('board_search' if keyword else 'board_list', page=i, q=keyword) }}">{{ i }}</a>
+                </li>
+            {% endfor %}
+            
+            {% if current_page < total_pages %}
+                <li><a href="{{ url_for('board_search' if keyword else 'board_list', page=current_page+1, q=keyword) }}">&raquo;</a></li>
+            {% endif %}
+        </ul>
+        {% endif %}
+    </div>
+    {% endblock %}
+
+    {% block additional_scripts %}
+    // 게시판 애니메이션
+    document.addEventListener('DOMContentLoaded', function() {
+        // 검색 섹션 애니메이션
+        gsap.from('.search-filter-section', {
+            y: -30,
+            opacity: 0,
+            duration: 0.6,
+            ease: 'power2.out'
+        });
+
+        // 테이블 행 순차 애니메이션
+        gsap.from('.board-table thead', {
+            y: -20,
+            opacity: 0,
+            duration: 0.5,
+            ease: 'power2.out',
+            delay: 0.2
+        });
+
+        gsap.from('.board-table tbody tr', {
+            x: -30,
+            opacity: 0,
+            duration: 0.5,
+            stagger: 0.05,
+            ease: 'power2.out',
+            delay: 0.4
+        });
+
+        // 글쓰기 버튼 애니메이션
+        const writeBtn = document.querySelector('.write-btn');
+        if (writeBtn) {
+            gsap.from(writeBtn, {
+                scale: 0,
+                opacity: 0,
+                duration: 0.5,
+                ease: 'back.out(2)',
+                delay: 0.3
+            });
+
+            writeBtn.addEventListener('mouseenter', function() {
+                gsap.to(this, {
+                    scale: 1.1,
+                    boxShadow: '0 5px 15px rgba(0,123,255,0.4)',
+                    duration: 0.3,
+                    ease: 'power2.out'
+                });
+            });
+
+            writeBtn.addEventListener('mouseleave', function() {
+                gsap.to(this, {
+                    scale: 1,
+                    boxShadow: 'none',
+                    duration: 0.3,
+                    ease: 'power2.out'
+                });
+            });
+        }
+
+        // 테이블 행 호버 효과
+        document.querySelectorAll('.board-table tbody tr').forEach(row => {
+            row.addEventListener('mouseenter', function() {
+                gsap.to(this, {
+                    x: 5,
+                    backgroundColor: '#f1f1f1',
+                    duration: 0.2,
+                    ease: 'power2.out'
+                });
+            });
+
+            row.addEventListener('mouseleave', function() {
+                gsap.to(this, {
+                    x: 0,
+                    backgroundColor: 'transparent',
+                    duration: 0.2,
+                    ease: 'power2.out'
+                });
+            });
+        });
+
+        // 페이지네이션 애니메이션
+        gsap.from('.pagination li', {
+            scale: 0,
+            opacity: 0,
+            duration: 0.3,
+            stagger: 0.05,
+            ease: 'back.out(2)',
+            delay: 0.6
+        });
+    });
+    {% endblock %}
+</body>
+</html>

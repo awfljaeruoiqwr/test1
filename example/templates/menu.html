@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{% endblock %}</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* 오른쪽 상단 사용자 메뉴 */
+        .user-menu {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .user-menu {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+        }
+
+        .user-menu a {
+            color: #333;
+            text-decoration: none;
+            padding: 8px 15px;
+            background: transparent;
+            border-radius: 5px;
+            border: none;
+            transition: all 0.3s;
+            font-size: 14px;
+        }
+
+        .user-menu a:hover {
+            color: #007bff;
+        }
+
+
+        .user-menu .logout-link {
+            background: transparent;
+            color: #dc3545;
+            border: none;
+        }
+
+        .user-menu .logout-link:hover {
+            color: #c82333;
+        }
+
+        .user-menu .user-id {
+            color: #666;
+            font-weight: bold;
+            padding: 8px 15px;
+            background: transparent;
+            border-radius: 5px;
+            border: none;
+            font-size: 14px;
+        }
+
+        /* 메뉴 아이콘 스타일 */
+        .menu-icon {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            font-size: 24px;
+            color: white;
+            z-index: 1000;
+            cursor: pointer;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #333;
+            border-radius: 5px;
+            transition: 0.3s;
+        }
+
+        .menu-icon:hover {
+            background: #444;
+        }
+
+        /* 사이드바 스타일 */
+        .sidebar {
+            width: 0;
+            background: #333;
+            position: fixed;
+            height: 100%;
+            color: white;
+            padding-top: 80px;
+            transition: 0.3s;
+            overflow-x: hidden;
+            white-space: nowrap;
+        }
+
+        .sidebar.active {
+            width: 250px;
+        }
+
+        .sidebar:hover {
+            width: 250px;
+        }
+
+        /* 메뉴 아이템 스타일 */
+        .menu-item {
+            padding: 15px;
+            margin: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+            color: white;
+            border-radius: 5px;
+            overflow: hidden;
+            border-left: 3px solid transparent;
+        }
+
+        .menu-item:hover {
+            background: #444;
+        }
+
+        .menu-item i {
+            margin-right: 15px;
+            width: 20px;
+            text-align: center;
+            transition: 0.3s;
+        }
+
+        /* 서브메뉴 스타일 */
+        .submenu {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            margin-left: 25px;
+            border-left: 1px solid #555;
+        }
+
+        .menu-item.active .submenu {
+            max-height: 1000px;
+            margin-top: 10px;
+        }
+
+        .submenu-item {
+            padding: 10px 15px;
+            color: #ddd;
+            cursor: pointer;
+            transition: 0.3s;
+            margin: 2px 0;
+            border-radius: 3px;
+        }
+
+        .submenu-item:hover {
+            background: #555;
+            color: white;
+        }
+
+        /* 메인 컨텐츠 영역 */
+        .main-content {
+            margin-left: 50px;
+            flex-grow: 1;
+            padding: 20px;
+            width: calc(100% - 50px);
+            transition: 0.3s;
+        }
+        
+        .main-content.shifted {
+            margin-left: 250px;
+            width: calc(100% - 250px);
+        }
+
+        .sidebar:hover + .main-content {
+            margin-left: 250px;
+            width: calc(100% - 250px);
+        }
+
+        /* 모달 스타일 수정 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0);
+            transition: background-color 0.3s ease;
+            opacity: 0;
+            z-index: 2000;
+        }
+        
+        .modal.show {
+            opacity: 1;
+            background-color: rgba(0,0,0,0.5);
+        }
+        
+        .login-modal-content {
+            background-color: white;
+            width: 300px;
+            padding: 20px;
+            border-radius: 5px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.7);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .modal.show .login-modal-content {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+        }
+        
+        .close-button {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            cursor: pointer;
+            font-size: 20px;
+        }
+
+        .button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-block;
+            margin: 10px 0;
+            transition: background-color 0.3s;
+            width: 100%;
+        }
+        
+        .button:hover {
+            background-color: #0056b3;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            text-align: left;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        {% block additional_styles %}{% endblock %}
+    </style>
+</head>
+<body>
+    <!-- 오른쪽 상단 사용자 메뉴 -->
+    {% if current_user or userid %}
+    <div class="user-menu">
+        <span class="user-id">{{ current_user or userid }}님</span>
+        <a href="/my_info">나의 정보</a>
+        <a href="/logout" class="logout-link">로그아웃</a>
+    </div>
+    {% else %}
+    <div class="user-menu">
+        <a href="#" onclick="openLoginModal(); return false;">로그인</a>
+        <a href="/register">회원가입</a>
+    </div>
+    {% endif %}
+
+    <div class="menu-icon" onclick="toggleSidebar()">
+        <i class="fas fa-bars"></i>
+    </div>
+    <div class="sidebar">
+        <div class="menu-item" onclick="toggleSubmenu(this)">
+            <i class="fas fa-home"></i> 홈
+            <div class="submenu">
+                <div class="submenu-item" onclick="location.href='/'">메인페이지</div>
+            </div>
+        </div>
+        <div class="menu-item" onclick="toggleSubmenu(this)">
+            <i class="fas fa-clipboard"></i> 게시판
+            <div class="submenu">
+                <div class="submenu-item" onclick="location.href='/board'">전체글 보기</div>
+                {% if current_user or userid %}
+                <div class="submenu-item" onclick="location.href='/board/write'">글 작성하기</div>
+                {% endif %}
+            </div>
+        </div>
+        <div class="menu-item" onclick="toggleSubmenu(this)">
+            <i class="fas fa-boxes"></i> 재고 관리
+            <div class="submenu">
+                <div class="submenu-item" onclick="location.href='/edl-doctor'">EDL-Doctor</div>
+                <div class="submenu-item" onclick="location.href='#'">BCG</div>
+                <div class="submenu-item" onclick="location.href='/smartring'">SMARTRING</div>
+            </div>
+        </div>
+        <!-- 로그인 상태에 따른 메뉴 표시 -->
+        {% if current_user and request.path != '/register' %}
+        <div class="menu-item" onclick="toggleSubmenu(this)">
+            <i class="fas fa-user-circle"></i> 내 계정
+            <div class="submenu">
+                <div class="submenu-item" onclick="location.href='/my_info'">내 정보</div>
+                <div class="submenu-item" onclick="location.href='/logout'">로그아웃</div>
+            </div>
+        </div>
+        {% elif userid and request.path == '/login_success/' + userid %}
+        <div class="menu-item" onclick="toggleSubmenu(this)">
+            <i class="fas fa-user-circle"></i> 내 계정
+            <div class="submenu">
+                <div class="submenu-item" onclick="location.href='/my_info'">내 정보</div>
+                <div class="submenu-item" onclick="location.href='/logout'">로그아웃</div>
+            </div>
+        </div>
+        {% else %}
+        <div class="menu-item" onclick="toggleSubmenu(this)">
+            <i class="fas fa-user"></i> 계정
+            <div class="submenu">
+                <div class="submenu-item" onclick="openLoginModal()">로그인</div>
+                <div class="submenu-item" onclick="location.href='/register'">회원가입</div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- 메인 콘텐츠 -->
+    <div class="main-content">
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- 공통 로그인 모달 -->
+    {% if not current_user or request.path == '/register' %}
+    <div id="loginModal" class="modal login-modal">
+        <div class="modal-content login-modal-content">
+            <span class="close-button" onclick="closeLoginModal()">&times;</span>
+            <h2>로그인</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="username">아이디</label>
+                    <input type="text" id="username" name="username" required>
+                </div>
+                <div class="form-group">
+                    <label for="password">비밀번호</label>
+                    <input type="password" id="password" name="password" required>
+                </div>
+                <button type="submit" class="button">로그인</button>
+            </form>
+        </div>
+    </div>
+    {% endif %}
+
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            const mainContent = document.querySelector('.main-content');
+            sidebar.classList.toggle('active');
+            mainContent.classList.toggle('shifted');
+            
+            // 사이드바 상태 저장
+            if(sidebar.classList.contains('active')) {
+                sessionStorage.setItem('sidebarState', 'active');
+            } else {
+                sessionStorage.removeItem('sidebarState');
+            }
+        }
+
+        function toggleSubmenu(element) {
+            element.classList.toggle('active');
+        }
+
+        function openLoginModal() {
+            const modal = document.getElementById('loginModal');
+            if (modal) {
+                modal.style.display = 'block';
+                modal.offsetHeight; // 강제 리플로우
+                modal.classList.add('show');
+                console.log('로그인 모달 열기');
+            } else {
+                console.error('로그인 모달을 찾을 수 없습니다.');
+            }
+        }
+
+        function closeLoginModal() {
+            const modal = document.getElementById('loginModal');
+            if (modal) {
+                modal.classList.remove('show');
+                setTimeout(() => {
+                    modal.style.display = 'none';
+                }, 300);
+            }
+        }
+
+        window.onload = function() {
+            const sidebar = document.querySelector('.sidebar');
+            const mainContent = document.querySelector('.main-content');
+            
+            // 트랜지션 일시적으로 제거
+            sidebar.style.transition = 'none';
+            mainContent.style.transition = 'none';
+            
+            // 저장된 사이드바 상태 복원
+            if(sessionStorage.getItem('sidebarState') === 'active') {
+                sidebar.classList.add('active');
+                mainContent.classList.add('shifted');
+            } else {
+                sidebar.classList.remove('active');
+                mainContent.classList.remove('shifted');
+            }
+            
+            // 강제로 레이아웃 재계산
+            sidebar.offsetHeight;
+            
+            // 트랜지션 복원 (약간의 지연을 두어 초기 상태에서 애니메이션이 보이지 않게)
+            setTimeout(function() {
+                sidebar.style.transition = '0.3s';
+                mainContent.style.transition = '0.3s';
+            }, 100);
+        }
+
+        // 로그인 폼 제출 처리
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginForm = document.getElementById('loginForm');
+            
+            if (loginForm) {
+                loginForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const username = loginForm.querySelector('input[name="username"]').value;
+                    const password = loginForm.querySelector('input[name="password"]').value;
+                    
+                    console.log('로그인 시도:', username);
+                    
+                    fetch('/login', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            username: username,
+                            password: password
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('로그인 응답:', data);
+                        if (data.success) {
+                            closeLoginModal();
+                            alert(username + '님, 환영합니다!');
+                            window.location.href = data.redirect;
+                        } else {
+                            alert('아이디 또는 비밀번호가 올바르지 않습니다.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('로그인 오류:', error);
+                        alert('로그인 처리 중 오류가 발생했습니다.');
+                    });
+                });
+            }
+        });
+        {% block additional_scripts %}{% endblock %}
+    </script>
+</body>
+</html>

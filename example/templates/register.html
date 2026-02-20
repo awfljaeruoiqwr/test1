@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>회원가입</title>
+    <style>
+        .container {
+            width: 400px;
+            margin: 50px auto;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .input-group {
+            display: flex;
+            gap: 10px;
+        }
+        input[type="text"],
+        input[type="password"] {
+            width: 50%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .check-button {
+            background-color: #28a745;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .submit-button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+        }
+        .flash-message {
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .rules-box {
+            background-color: #f8f9fa;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #007bff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .rules-box p {
+            font-weight: bold;
+            color: #343a40;
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 0.95em;
+        }
+        .rules-box ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+        .rules-box li {
+            color: #495057;
+            font-size: 0.9em;
+            margin-bottom: 6px;
+            position: relative;
+            list-style-type: none;
+            padding-left: 22px;
+        }
+        .rules-box li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #28a745;
+            font-weight: bold;
+        }
+        .rules-box li:last-child {
+            margin-bottom: 0;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .flash-message {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+        .rules-box {
+            animation: fadeIn 0.4s ease-out;
+        }
+    </style>
+</head>
+<body>
+    {% extends "menu.html" %}
+
+    {% block title %}회원가입{% endblock %}
+
+    {% block additional_styles %}
+    .container {
+        width: 400px;
+        margin: 50px auto;
+        padding: 20px;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+    }
+    /* 기존 스타일 유지 */
+    {% endblock %}
+
+    {% block content %}
+    <div class="container">
+        <h2>회원가입</h2>
+        <div class="rules-box">
+            <p>아이디 생성 규칙:</p>
+            <ul>
+                <li>최소 5자 이상 입력</li>
+                <li>영문자와 숫자만 사용 가능</li>
+                <li>공백 사용 불가</li>
+                <li>한글 사용 불가</li>
+                <li>특수문자 사용 불가</li>
+            </ul>
+        </div>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash-message {{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        <form action="/register" method="POST">
+            <div class="form-group">
+                <label for="username">아이디</label>
+                <div class="input-group">
+                    <input type="text" id="username" name="username" value="{{ userid or '' }}" required>
+                    <button type="submit" name="action" value="check" class="check-button">중복 확인</button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="password">비밀번호</label>
+                <input type="password" id="password" name="password" required {% if not session.get('id_checked') %}disabled{% endif %}>
+            </div>
+            <button type="submit" name="action" value="register" class="submit-button" {% if not session.get('id_checked') %}disabled{% endif %}>가입하기</button>
+        </form>
+    </div>
+    <script>
+        document.getElementById('username').addEventListener('input', function() {
+            console.log('아이디 입력 필드 변경됨');
+            
+            // 비밀번호 필드와 가입하기 버튼 비활성화
+            document.getElementById('password').disabled = true;
+            document.getElementById('password').value = '';
+            document.querySelector('button[value="register"]').disabled = true;
+            
+            // 세션 초기화를 위한 요청
+            fetch('/reset_check', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            }).then(response => response.json())
+              .then(data => {
+                  console.log('중복 확인 상태 초기화됨');
+              })
+              .catch(error => {
+                  console.error('초기화 요청 오류:', error);
+              });
+        });
+    </script>
+    {% endblock %}
+</body>
+</html>
