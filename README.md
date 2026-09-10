@@ -1,6 +1,6 @@
-# KIA TIGERS — Netlify용 프로젝트
+# KIA TIGERS 커스텀 사이트
 
-페이지를 분리한 KIA TIGERS 사이트를 표준 Next.js App Router로 전환한 프로젝트입니다.
+KIA TIGERS 사이트를 Next.js App Router로 만든 프로젝트입니다.
 
 ## GitHub에 올리기
 1. ZIP 압축을 풉니다.
@@ -17,9 +17,6 @@
    - Node.js: 22
 3. 배포를 실행합니다. Next.js 어댑터는 Netlify가 자동 적용합니다.
 4. 배포 후 경기일정, 선수 기록, 상세 주소 직접 접속을 확인합니다.
-
-폴더째 저장소에 넣었다면 Base directory에 그 폴더명을 지정하세요.
-API 서버 기능을 사용하므로 정적 파일 드래그앤드롭 배포나 `output: "export"`를 사용하지 않습니다.
 
 ## 로컬 실행
 Node.js 22.13 이상이 필요합니다.
@@ -49,19 +46,6 @@ npm test
 - `/players`: 선수단과 검색
 - `/players/[id]`: 프로필과 연도별 기록
 - `/stadium`: 좌석, 예매 안내, 시설, 교통 탭
-
-## 데이터와 배포 환경
-구단 공개 서버에서 경기·선수·입장권 데이터를 가져옵니다. 별도 API 키는 필요하지 않습니다.
-외부 사진, 폰트, 영상 썸네일은 원본 서버에서 로드합니다.
-구단 연결 실패 시 기존 오류 안내 및 일정 저장본 처리 방식이 유지됩니다.
-기존 Sites의 비공개 접근 제한은 포함되어 있지 않으므로 Netlify 공개 범위는 해당 계정에서 설정하세요.
-실제 Netlify 계정 배포는 사용자가 진행해야 합니다. 로컬 검증 결과는 VERIFICATION.md에 기록합니다.
-
-## 전환 내용
-- Vinext / Cloudflare / Sites 전용 의존성과 설정 제거
-- Next.js 빌드·실행 스크립트, TypeScript 및 Tailwind PostCSS 설정 적용
-- Node.js 버전 및 Netlify 빌드 설정 추가
-- 재현 가능한 설치를 위한 package-lock.json 포함
 
 ## 참고 문서
 - https://docs.netlify.com/build/frameworks/framework-setup-guides/nextjs/overview/
